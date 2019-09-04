@@ -572,16 +572,19 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                             BluetoothAdapter.ERROR);
                     switch (state) {
                         case BluetoothAdapter.STATE_OFF:
-                            sink.success(Protos.BluetoothState.newBuilder().setState(Protos.BluetoothState.State.OFF).build().toByteArray());
-                            break;
+                                invokeSinkUIThread(sink, Protos.BluetoothState.newBuilder()
+                                .setState(Protos.BluetoothState.State.OFF).build().toByteArray());                            break;
                         case BluetoothAdapter.STATE_TURNING_OFF:
-                            sink.success(Protos.BluetoothState.newBuilder().setState(Protos.BluetoothState.State.TURNING_OFF).build().toByteArray());
+                            invokeSinkUIThread(sink, Protos.BluetoothState.newBuilder()
+                                .setState(Protos.BluetoothState.State.TURNING_OFF).build().toByteArray());
                             break;
                         case BluetoothAdapter.STATE_ON:
-                            sink.success(Protos.BluetoothState.newBuilder().setState(Protos.BluetoothState.State.ON).build().toByteArray());
+                            invokeSinkUIThread(sink, Protos.BluetoothState.newBuilder()
+                                .setState(Protos.BluetoothState.State.ON).build().toByteArray());
                             break;
                         case BluetoothAdapter.STATE_TURNING_ON:
-                            sink.success(Protos.BluetoothState.newBuilder().setState(Protos.BluetoothState.State.TURNING_ON).build().toByteArray());
+                            invokeSinkUIThread(sink, Protos.BluetoothState.newBuilder()
+                                .setState(Protos.BluetoothState.State.TURNING_ON).build().toByteArray());
                             break;
                     }
                 }
@@ -638,7 +641,7 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                     super.onScanResult(callbackType, result);
                     if(scanResultsSink != null) {
                         Protos.ScanResult scanResult = ProtoMaker.from(result.getDevice(), result);
-                        scanResultsSink.success(scanResult.toByteArray());
+                        invokeSinkUIThread(scanResultsSink, scanResult.toByteArray());
                     }
                 }
 
@@ -689,7 +692,7 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                                      byte[] scanRecord) {
                     if(scanResultsSink != null) {
                         Protos.ScanResult scanResult = ProtoMaker.from(bluetoothDevice, scanRecord, rssi);
-                        scanResultsSink.success(scanResult.toByteArray());
+                        invokeSinkUIThread(scanResultsSink, scanResult.toByteArray());
                     }
                 }
             };
@@ -779,7 +782,7 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                 for(BluetoothGattService s : gatt.getServices()) {
                     p.addServices(ProtoMaker.from(gatt.getDevice(), s, gatt));
                 }
-            invokeMethod("DiscoverServicesResult", p.build().toByteArray());
+                invokeSinkUIThread(servicesDiscoveredSink, p.build().toByteArray());
             }
         }
 
@@ -813,7 +816,7 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
             Protos.OnNotificationResponse.Builder p = Protos.OnNotificationResponse.newBuilder();
             p.setRemoteId(gatt.getDevice().getAddress());
             p.setCharacteristic(ProtoMaker.from(characteristic, gatt));
-            invokeMethod("OnCharacteristicChanged", p.build().toByteArray());
+                invokeSinkUIThread(characteristicReadSink, p.build().toByteArray());
         }
 
         @Override
@@ -842,7 +845,7 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                 Protos.ReadDescriptorResponse.Builder p = Protos.ReadDescriptorResponse.newBuilder();
                 p.setRequest(q);
                 p.setValue(ByteString.copyFrom(descriptor.getValue()));
-            invokeMethod("ReadDescriptorResponse", p.build().toByteArray());
+                invokeSinkUIThread(descriptorReadSink, p.build().toByteArray());
             }
 
         }
@@ -904,6 +907,15 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                         channel.invokeMethod(name, byteArray);
                     }
                 });
+    }
+
+        private void invokeSinkUIThread(final EventSink sink, final Object arguments) {
+        invokeMethodUIThread(new Runnable() {
+            @Override
+            public void run() {
+                sink.success(arguments);
+            }
+        });
     }
 
         private void invokeMethod(final String name, final byte[] byteArray)
