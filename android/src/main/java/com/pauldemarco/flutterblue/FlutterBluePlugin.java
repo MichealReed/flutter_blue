@@ -779,8 +779,7 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                 for(BluetoothGattService s : gatt.getServices()) {
                     p.addServices(ProtoMaker.from(gatt.getDevice(), s, gatt));
                 }
-                servicesDiscoveredSink.success(p.build().toByteArray());
-            }
+                invokeMethodUIThread("DiscoverServicesResult", p.build().toByteArray());            }
         }
 
         @Override
@@ -790,8 +789,7 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                 Protos.ReadCharacteristicResponse.Builder p = Protos.ReadCharacteristicResponse.newBuilder();
                 p.setRemoteId(gatt.getDevice().getAddress());
                 p.setCharacteristic(ProtoMaker.from(characteristic, gatt));
-                characteristicReadSink.success(p.build().toByteArray());
-            }
+                invokeMethodUIThread("ReadCharacteristicResponse", p.build().toByteArray());            }
         }
 
         @Override
@@ -842,8 +840,7 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                 Protos.ReadDescriptorResponse.Builder p = Protos.ReadDescriptorResponse.newBuilder();
                 p.setRequest(q);
                 p.setValue(ByteString.copyFrom(descriptor.getValue()));
-                descriptorReadSink.success(p.build().toByteArray());
-            }
+            invokeMethodUIThread("ReadDescriptorResponse", p.build().toByteArray());            }
 
         }
 
