@@ -5,6 +5,7 @@
 package com.pauldemarco.flutterblue;
 
 import android.Manifest;
+import android.app.Activity;
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
