@@ -909,13 +909,17 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                 });
     }
 
-        private void invokeSinkUIThread(final EventSink sink, final Object arguments) {
-        invokeMethodUIThread(new Runnable() {
+    private void invokeSinkUIThread(final EventSink sink, final Object arguments) {
+        runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 sink.success(arguments);
             }
         });
+    }
+
+    private void runOnUiThread(Runnable runnable) {
+        activity.runOnUiThread(runnable);
     }
 
         private void invokeMethod(final String name, final byte[] byteArray)
