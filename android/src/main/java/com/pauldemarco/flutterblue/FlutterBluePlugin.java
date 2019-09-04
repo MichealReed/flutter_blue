@@ -779,7 +779,8 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                 for(BluetoothGattService s : gatt.getServices()) {
                     p.addServices(ProtoMaker.from(gatt.getDevice(), s, gatt));
                 }
-                invokeMethodUIThread("DiscoverServicesResult", p.build().toByteArray());            }
+            invokeMethod("DiscoverServicesResult", p.build().toByteArray());
+            }
         }
 
         @Override
@@ -789,7 +790,8 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                 Protos.ReadCharacteristicResponse.Builder p = Protos.ReadCharacteristicResponse.newBuilder();
                 p.setRemoteId(gatt.getDevice().getAddress());
                 p.setCharacteristic(ProtoMaker.from(characteristic, gatt));
-                invokeMethodUIThread("ReadCharacteristicResponse", p.build().toByteArray());            }
+            invokeMethod("ReadCharacteristicResponse", p.build().toByteArray());
+            }
         }
 
         @Override
@@ -811,7 +813,7 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
             Protos.OnNotificationResponse.Builder p = Protos.OnNotificationResponse.newBuilder();
             p.setRemoteId(gatt.getDevice().getAddress());
             p.setCharacteristic(ProtoMaker.from(characteristic, gatt));
-            invokeMethod("OnValueChanged", p.build().toByteArray());
+            invokeMethod("OnCharacteristicChanged", p.build().toByteArray());
         }
 
         @Override
@@ -840,7 +842,8 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                 Protos.ReadDescriptorResponse.Builder p = Protos.ReadDescriptorResponse.newBuilder();
                 p.setRequest(q);
                 p.setValue(ByteString.copyFrom(descriptor.getValue()));
-            invokeMethodUIThread("ReadDescriptorResponse", p.build().toByteArray());            }
+            invokeMethod("ReadDescriptorResponse", p.build().toByteArray());
+            }
 
         }
 
